@@ -7,7 +7,7 @@ import os
 import base64
 from datetime import datetime
 from typing import Dict, Any, Optional
-import google.generativeai as genai
+from google import genai
 from PIL import Image
 import io
 
