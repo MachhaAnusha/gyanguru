@@ -5,7 +5,7 @@ Handles all interactions with Google's Gemini 2.0 Flash API
 
 import os
 import time
-import google.generativeai as genai
+from google import genai
 from typing import Optional, Dict, Any
 
 
@@ -18,29 +18,12 @@ class GeminiClient:
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY not found. Set it in environment or pass directly.")
         
-        genai.configure(api_key=self.api_key)
+        # Create new Gemini client (NEW SDK)
+        self.client = genai.Client(api_key=self.api_key)
+
+        #Use a supported model
+        self.model = "gemini-2.0-flash"
         
-        # Configure the model
-        self.generation_config = {
-            "temperature": 0.7,
-            "top_p": 0.95,
-            "top_k": 40,
-            "max_output_tokens": 8192,
-        }
-        
-        self.safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-        ]
-        
-        self.model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            generation_config=self.generation_config,
-            safety_settings=self.safety_settings
-        )
-    
     def _retry_with_backoff(self, func, max_retries: int = 3):
         """Execute function with exponential backoff for rate limiting"""
         for attempt in range(max_retries):
@@ -95,8 +78,12 @@ Format your response in clean Markdown with:
 Make the content accessible yet technically accurate. Use analogies where helpful."""
 
         def generate():
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             return response.text
+
         
         content = self._retry_with_backoff(generate)
         
@@ -147,8 +134,12 @@ Format:
 Return ONLY the Python code without any markdown formatting or explanation outside the code."""
 
         def generate():
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             return response.text
+
         
         code = self._retry_with_backoff(generate)
         
@@ -195,8 +186,12 @@ Requirements:
 Write ONLY the spoken script without stage directions or formatting."""
 
         def generate():
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             return response.text
+
         
         script = self._retry_with_backoff(generate)
         
@@ -241,8 +236,12 @@ The prompt should describe:
 Return a single detailed paragraph that can be used for image generation."""
 
         def generate():
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt
+            )
             return response.text
+
         
         image_prompt = self._retry_with_backoff(generate)
         
