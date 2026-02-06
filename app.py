@@ -371,7 +371,9 @@ def server_error(e):
 # Main Entry Point
 # ============================================================================
 
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     # Check for API key
     api_key = os.getenv('GEMINI_API_KEY')
     if not api_key or api_key == 'your-api-key-here':
@@ -380,18 +382,13 @@ if __name__ == '__main__':
         print("="*60)
         print("To use GyanGuru, you need a Google Gemini API key.")
         print("1. Get your key at: https://aistudio.google.com/apikey")
-        print("2. Set it: export GEMINI_API_KEY='your-key-here'")
+        print("2. Set it in Render Environment Variables")
         print("="*60 + "\n")
-    
-    # Run Flask app
-    host = os.getenv('FLASK_HOST', '127.0.0.1')
-    port = int(os.getenv('FLASK_PORT', 5000))
-    debug = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
-    
+
+    # Render provides PORT automatically
+    port = int(os.environ.get("PORT", 5000))
+
     print(f"\n🚀 Starting GyanGuru ML Learning Assistant")
-    print(f"📍 Access at: http://{host}:{port}")
-    print(f"📚 Features: Text | Code | Audio | Images\n")
-    
-    app.run(host=host, port=port, debug=debug)
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    print(f"📍 Listening on 0.0.0.0:{port}\n")
+
+    app.run(host="0.0.0.0", port=port, debug=False)
